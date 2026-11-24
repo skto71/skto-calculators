@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>СКТО | Конькобежные расчёты</title>
+<meta name="description" content="Возрастные группы и разрядный калькулятор по конькобежному спорту">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<!-- Версия оболочки. Меняется вместе с "app" в version.json (см. README). -->
+<meta name="skto-app-version" content="1.0.0">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png?v=2">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Расчёты СКТО">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{--bg:#000;--card:#111214;--card2:#1b1c1f;--line:#2a2c30;--red:#e01b24;--red2:#7d0f14;--silver:#c4c8d0;--dim:#8b9097;--txt:#fff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font:100%/1.4 -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;overflow:hidden}
+[hidden]{display:none!important}
+a{color:inherit}
+#app{position:fixed;inset:0;height:100vh;height:100dvh;display:flex;flex-direction:column;min-width:0;
+  padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+  padding:calc(.9rem + env(safe-area-inset-top,0px)) .9rem 1.5rem;width:100%;max-width:42rem;margin:0 auto}
+h1{margin:.2rem 0 .15rem;font-size:1.6rem;line-height:1.2;letter-spacing:.2px;overflow-wrap:anywhere}
+h1 b{color:var(--red)}
+h2{margin:0 0 .6rem;font-size:1.15rem}
+.sub{margin:0 0 1.1rem;color:var(--silver);font-size:.95rem}
+.tools{display:grid;gap:.8rem}
+.tool{display:block;text-decoration:none;color:var(--txt);background:var(--card);border:2px solid var(--red);border-radius:1rem;
+  padding:1.1rem 1rem;min-height:6.5rem;position:relative;padding-right:2.4rem}
+.tool:active{background:var(--red2)}
+.tool b{display:block;font-size:1.35rem;margin-bottom:.35rem;overflow-wrap:anywhere}
+.tool span{display:block;color:var(--silver);font-size:.97rem}
+.tool:after{content:"›";position:absolute;right:1rem;top:50%;transform:translateY(-50%);font-size:2rem;color:var(--red)}
+.tool:focus-visible,.btn:focus-visible,.back:focus-visible,a:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:.8rem;padding:.8rem .9rem;margin-top:.9rem;font-size:.92rem;color:var(--silver)}
+.box b{color:var(--txt)}
+.box p{margin:.35rem 0}
+.btn{font:inherit;font-weight:600;font-size:1rem;color:#fff;background:var(--card2);border:1.5px solid var(--silver);border-radius:.7rem;
+  min-height:3rem;padding:.55rem 1rem;cursor:pointer;margin:.35rem .5rem .1rem 0}
+.btn.red{background:var(--red);border-color:var(--red)}
+.btn.link{background:none;border-color:transparent;color:var(--dim);text-decoration:underline;min-height:2.5rem}
+.foot{margin-top:1.2rem;text-align:center}
+.foot a{display:inline-block;padding:.7rem 1rem;color:var(--silver);font-size:.95rem}
+#bar{display:flex;align-items:center;gap:.7rem;flex:none;background:#000;border-bottom:1px solid var(--line);
+  padding:calc(.5rem + env(safe-area-inset-top,0px)) .7rem .5rem}
+.back{display:inline-flex;align-items:center;flex:none;min-height:3rem;padding:.4rem .9rem;text-decoration:none;font-weight:700;font-size:1rem;
+  color:#fff;background:var(--card2);border:2px solid var(--red);border-radius:.7rem;white-space:nowrap}
+.back:active{background:var(--red2)}
+#barTitle{color:var(--silver);font-size:.95rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#modhost{flex:1;min-height:0;position:relative;background:#000}
+#modhost iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+#upd{flex:none;background:#150607;border-bottom:2px solid var(--red)}
+#upd .row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.5rem .8rem;font-size:.92rem}
+#upd .row span{flex:1 1 12rem;min-width:0}
+#upd .btn{margin:0}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+td,th{padding:.5rem .3rem;border-top:1px solid var(--line);text-align:left;vertical-align:top;overflow-wrap:anywhere}
+th{color:var(--dim);font-size:.75rem;text-transform:uppercase;border-top:0;font-weight:600}
+td:last-child{text-align:right;font-variant-numeric:tabular-nums;color:#fff;font-weight:600}
+.ok{color:#8fd19a}.warn{color:#ffb4b7}
+code{background:#000;border:1px solid var(--line);border-radius:.3rem;padding:0 .3rem;font-size:.85em;overflow-wrap:anywhere}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(1rem + env(safe-area-inset-bottom,0px));background:var(--card2);
+  border:1.5px solid var(--red);border-radius:.7rem;padding:.6rem 1rem;max-width:90vw;font-size:.95rem;z-index:50}
+</style>
+</head>
+<body>
+<noscript><p style="padding:1rem;color:#fff">Для работы приложения нужен JavaScript.</p></noscript>
+<div id="app">
+  <header id="bar" hidden>
+    <a class="back" id="back" href="#menu">← Главное меню</a>
+    <span id="barTitle"></span>
+  </header>
+  <div id="upd" role="status" aria-live="polite" hidden></div>
+
+  <main id="menu" class="scroll">
+    <h1><b>СКТО</b> | Конькобежные расчёты</h1>
+    <p class="sub">Союз конькобежцев Тульской области · работает без интернета</p>
+    <nav class="tools" aria-label="Инструменты">
+      <a class="tool" href="#age-groups"><b>Возрастные группы</b><span>Определение возрастной группы и сезона перехода по дате рождения спортсмена</span></a>
+      <a class="tool" href="#ranks"><b>Разрядный калькулятор</b><span>Нормативы, выполненный разряд, расчёт результата и времени по кругам</span></a>
+    </nav>
+    <div class="box" id="install" hidden></div>
+    <div class="foot"><a href="#about">О приложении · версии</a></div>
+  </main>
+
+  <main id="about" class="scroll" hidden>
+    <h1>О приложении</h1>
+    <p class="sub">СКТО | Конькобежные расчёты</p>
+    <div class="box" style="margin-top:0">
+      <table aria-label="Версии">
+        <tr><th>Часть</th><th style="text-align:right">Версия</th></tr>
+        <tr><td>Оболочка (главное меню)</td><td id="vApp">—</td></tr>
+        <tr><td>Возрастные группы</td><td id="vAge">—</td></tr>
+        <tr><td>Разрядный калькулятор</td><td id="vRanks">—</td></tr>
+      </table>
+      <p id="aboutStatus"></p>
+      <button class="btn red" id="btnCheck" type="button">Проверить обновления</button>
+      <button class="btn" id="btnInstall" type="button" hidden>Установить приложение</button>
+    </div>
+    <div class="box" id="offStatus"></div>
+    <div class="box" id="howInstall"></div>
+    <div class="box">
+      <p><b>Данные.</b> Настройки хранятся только на этом устройстве, в отдельных ключах:
+      <code>skto-tools.shell.settings.v1</code>, <code>skto-tools.age-groups.settings.v1</code>, <code>skto-tools.ranks.settings.v1</code>.
+      Дата рождения не сохраняется.</p>
+      <p>Приложение «СКТО | Дневник конькобежца» — отдельное: его данные эта программа не читает и не изменяет.</p>
+      <p>Нормативы и правила расчёта — в самих модулях (раздел «Условия и источник» разрядного калькулятора и пояснение в возрастных группах).</p>
+    </div>
+    <div class="foot"><a href="#menu">← Главное меню</a></div>
+  </main>
+
+  <div id="modhost" hidden></div>
+</div>
+<div id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+  /* ===== Реестр модулей (при добавлении нового модуля — добавить сюда и в sw.js: MODULE_IDS) ===== */
+  var MODULES = [
+    { id: 'age-groups', key: 'ageGroups', title: 'Возрастные группы',     path: 'modules/age-groups/index.html' },
+    { id: 'ranks',      key: 'ranks',     title: 'Разрядный калькулятор', path: 'modules/ranks/index.html' }
+  ];
+  var SETTINGS_KEY = 'skto-tools.shell.settings.v1';
+  var RELOADED_KEY = 'skto-tools.shell.reloaded';       // sessionStorage: защита от повторных перезагрузок
+  var CHECK_EVERY = 30 * 60 * 1000;
+
+  function $(id) { return document.getElementById(id); }
+  function byId(id) { for (var i = 0; i < MODULES.length; i++) if (MODULES[i].id === id) return MODULES[i]; return null; }
+
+  var RUN_APP = (document.querySelector('meta[name="skto-app-version"]') || {}).content || '?';
+  var remote = null;          // последний прочитанный version.json
+  var loaded = {};            // версия модуля, загруженная в iframe в этой сессии
+  var frames = {};
+  var pending = [];
+  var deferredPrompt = null;
+  var settings = { cached: {}, installDismissed: false, lastCheck: 0 };
+
+  try {
+    var s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    if (s && typeof s === 'object') {
+      if (s.cached && typeof s.cached === 'object') settings.cached = s.cached;
+      settings.installDismissed = !!s.installDismissed;
+      settings.lastCheck = +s.lastCheck || 0;
+    }
+  } catch (e) {}
+  function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {} }
+
+  function toast(t) {
+    var el = $('toast'); el.textContent = t; el.hidden = false;
+    clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 3500);
+  }
+
+  /* ===== Service worker ===== */
+  function swRequest(msg) {
+    if (!('serviceWorker' in navigator)) return Promise.reject(new Error('no sw'));
+    return Promise.race([
+      navigator.serviceWorker.ready.then(function (reg) {
+        return new Promise(function (resolve, reject) {
+          var ch = new MessageChannel();
+          ch.port1.onmessage = function (e) { (e.data && e.data.ok) ? resolve(e.data) : reject(new Error((e.data && e.data.error) || 'fail')); };
+          var target = reg.active || navigator.serviceWorker.controller;
+          if (!target) return reject(new Error('no active sw'));
+          target.postMessage(msg, [ch.port2]);
+        });
+      }),
+      new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, 20000); })
+    ]);
+  }
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' })
+        .catch(function (err) { console.warn('SW не зарегистрирован:', err && err.message); });
+    });
+  }
+
+  /* ===== Версии и обновления ===== */
+  function fetchVersions() {
+    return fetch('version.json', { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (v) { return (v && typeof v === 'object') ? v : null; })
+      .catch(function () { return null; });
+  }
+
+  function syncCaches() {
+    // для каждого модуля, версия которого изменилась, обновляем его офлайн-копию (только его!)
+    var chain = Promise.resolve();
+    MODULES.forEach(function (m) {
+      var v = remote && remote[m.key];
+      if (!v || settings.cached[m.id] === v) return;
+      chain = chain.then(function () {
+        return swRequest({ type: 'refresh-module', id: m.id }).then(function () {
+          settings.cached[m.id] = v; saveSettings();
+        }).catch(function () {});
+      });
+    });
+    return chain;
+  }
+
+  function computePending() {
+    var list = [];
+    if (remote) {
+      var reloadedFor = ''; try { reloadedFor = sessionStorage.getItem(RELOADED_KEY) || ''; } catch (e) {}
+      if (remote.app && remote.app !== RUN_APP && reloadedFor !== remote.app) list.push({ kind: 'app', ver: remote.app });
+      MODULES.forEach(function (m) {
+        if (loaded[m.id] === null && remote[m.key]) loaded[m.id] = settings.cached[m.id] || remote[m.key];
+        if (loaded[m.id] && remote[m.key] && loaded[m.id] !== remote[m.key]) list.push({ kind: 'mod', m: m, ver: remote[m.key] });
+      });
+    }
+    pending = list;
+  }
+
+  function renderUpdates() {
+    var box = $('upd'); box.innerHTML = '';
+    pending.forEach(function (p) {
+      var row = document.createElement('div'); row.className = 'row';
+      var t = document.createElement('span');
+      t.textContent = p.kind === 'app'
+        ? 'Доступно обновление приложения (' + p.ver + ').'
+        : 'Доступно обновление: «' + p.m.title + '» (' + p.ver + '). Остальное не меняется.';
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'btn red'; b.textContent = 'Обновить';
+      b.onclick = function () { p.kind === 'app' ? applyApp(p.ver) : applyModule(p.m, p.ver); };
+      row.appendChild(t); row.appendChild(b); box.appendChild(row);
+    });
+    box.hidden = !pending.length;
+  }
+
+  function applyApp(ver) {
+    try { sessionStorage.setItem(RELOADED_KEY, ver); } catch (e) {}
+    swRequest({ type: 'refresh-shell' }).catch(function () {}).then(function () {
+      return ('serviceWorker' in navigator) ? navigator.serviceWorker.getRegistration().then(function (r) { return r && r.update(); }).catch(function () {}) : null;
+    }).then(function () { location.reload(); });
+  }
+  function applyModule(m, ver) {
+    swRequest({ type: 'refresh-module', id: m.id }).then(function () { settings.cached[m.id] = ver; saveSettings(); }).catch(function () {}).then(function () {
+      loaded[m.id] = ver;
+      if (frames[m.id]) frames[m.id].src = m.path + '?v=' + encodeURIComponent(ver);
+      computePending(); renderUpdates(); renderAbout();
+      toast('«' + m.title + '» обновлён');
+    });
+  }
+
+  function check(manual) {
+    return fetchVersions().then(function (v) {
+      if (!v) { if (manual) toast('Нет связи — проверка не выполнена'); renderAbout(); return; }
+      remote = v; settings.lastCheck = Date.now(); saveSettings();
+      return syncCaches().then(function () {
+        computePending(); renderUpdates(); renderAbout();
+        if (manual) toast(pending.length ? 'Найдены обновления' : 'Установлены последние версии');
+      });
+    });
+  }
+
+  /* ===== Экраны и маршруты (только #имя) ===== */
+  function showView(v) {
+    $('menu').hidden = v !== 'menu';
+    $('about').hidden = v !== 'about';
+    $('modhost').hidden = v !== 'mod';
+    $('bar').hidden = v === 'menu';
+    if (v === 'about') renderAbout();
+    if (v === 'menu') $('menu').scrollTop = 0;
+  }
+  function ensureFrame(m) {
+    if (frames[m.id]) return frames[m.id];
+    var v = remote && remote[m.key];
+    var f = document.createElement('iframe');
+    f.title = m.title; f.setAttribute('data-mod', m.id);
+    f.src = m.path + (v ? '?v=' + encodeURIComponent(v) : '');
+    loaded[m.id] = v || null;
+    $('modhost').appendChild(f); frames[m.id] = f;
+    return f;
+  }
+  function openModule(m) {
+    showView('mod');
+    ensureFrame(m);
+    MODULES.forEach(function (x) { if (frames[x.id]) frames[x.id].hidden = x.id !== m.id; });
+    $('barTitle').textContent = m.title;
+  }
+  function route() {
+    var h = (location.hash || '').replace(/^#/, '');
+    var m = byId(h);
+    if (m) openModule(m);
+    else if (h === 'about') { showView('about'); $('barTitle').textContent = 'О приложении'; }
+    else showView('menu');
+  }
+  window.addEventListener('hashchange', route);
+
+  /* ===== О приложении ===== */
+  function fmtTime(ts) { if (!ts) return 'ещё не проверялось'; var d = new Date(ts); return d.toLocaleDateString('ru-RU') + ' ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }); }
+  function renderAbout() {
+    $('vApp').textContent = RUN_APP;
+    var ids = { 'age-groups': 'vAge', 'ranks': 'vRanks' };
+    MODULES.forEach(function (m) {
+      $(ids[m.id]).textContent = loaded[m.id] || settings.cached[m.id] || (remote && remote[m.key]) || '—';
+    });
+    var st = 'Последняя проверка: ' + fmtTime(settings.lastCheck) + '. ' + (navigator.onLine ? 'Есть подключение.' : 'Нет подключения.');
+    if (pending.length) st += ' Есть непримёненные обновления — см. полосу сверху.';
+    $('aboutStatus').textContent = st;
+    $('btnInstall').hidden = !deferredPrompt;
+    swRequest({ type: 'status' }).then(function (s) {
+      var parts = ['оболочка: ' + s.shell + ' ф.'];
+      MODULES.forEach(function (m) { parts.push(m.title.toLowerCase() + ': ' + (s.modules[m.id] || 0) + ' ф.'); });
+      var ready = s.shell > 0 && MODULES.every(function (m) { return s.modules[m.id] > 0; });
+      $('offStatus').innerHTML = '<b>Офлайн-копия:</b> <span class="' + (ready ? 'ok' : 'warn') + '">' + (ready ? 'готова' : 'неполная') + '</span><br>' + parts.join(' · ');
+    }).catch(function () {
+      $('offStatus').innerHTML = '<b>Офлайн-копия:</b> <span class="warn">недоступна</span><br>Сохранение для работы без интернета включается при открытии по адресу https:// (и на localhost).';
+    });
+    $('howInstall').innerHTML = '<p><b>Как установить на главный экран</b></p>' +
+      '<p><b>iPhone (Safari):</b> нажмите «Поделиться» → «На экран „Домой“». В других браузерах на iPhone кнопки может не быть.</p>' +
+      '<p><b>Android (Chrome):</b> меню ⋮ → «Установить приложение» (или «Добавить на главный экран»).</p>' +
+      (isStandalone() ? '<p class="ok">Приложение уже запущено как установленное.</p>' : '');
+  }
+  $('btnCheck').onclick = function () { check(true); };
+  $('btnInstall').onclick = doInstall;
+
+  /* ===== Установка ===== */
+  function isStandalone() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; }
+  function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+  function doInstall() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function () { deferredPrompt = null; renderInstall(); renderAbout(); });
+  }
+  function renderInstall() {
+    var box = $('install');
+    if (isStandalone() || settings.installDismissed || !(deferredPrompt || isIOS())) { box.hidden = true; return; }
+    box.hidden = false;
+    box.innerHTML = '<b>Установите приложение на главный экран</b>' +
+      '<p>' + (deferredPrompt ? 'Так оно откроется без адресной строки и будет работать без интернета.' :
+        'Нажмите «Поделиться» в Safari и выберите «На экран „Домой“».') + '</p>';
+    if (deferredPrompt) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'btn red'; b.textContent = 'Установить'; b.onclick = doInstall; box.appendChild(b);
+    }
+    var d = document.createElement('button'); d.type = 'button'; d.className = 'btn link'; d.textContent = 'Скрыть';
+    d.onclick = function () { settings.installDismissed = true; saveSettings(); renderInstall(); };
+    box.appendChild(d);
+  }
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredPrompt = e; renderInstall(); renderAbout(); });
+  window.addEventListener('appinstalled', function () { deferredPrompt = null; renderInstall(); renderAbout(); });
+
+  /* ===== Запуск ===== */
+  renderInstall();
+  route();
+  check(false);
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') check(false); });
+  window.addEventListener('online', function () { check(false); });
+  setInterval(function () { check(false); }, CHECK_EVERY);
+
+  // для отладки и проверки: window.SKTOShell.check()
+  window.SKTOShell = { check: check, state: function () { return { runApp: RUN_APP, remote: remote, loaded: loaded, cached: settings.cached, pending: pending.length }; } };
+})();
+</script>
+</body>
+</html>
