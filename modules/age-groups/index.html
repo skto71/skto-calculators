@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>СКТО | Возрастные группы</title>
+<style>
+:root{--bg:#000;--card:#111;--line:#2a2a2a;--red:#e01b24;--silver:#c4c8d0;--txt:#fff;--dim:#8b9099}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.4 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+body{padding:max(12px,env(safe-area-inset-top)) 12px max(16px,env(safe-area-inset-bottom));max-width:520px;margin:0 auto}
+h1{margin:0 0 2px;font-size:20px;letter-spacing:.5px}h1 b{color:var(--red)}
+.sub{color:var(--silver);font-size:13px;margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+label{display:block;font-size:12px;color:var(--silver);margin:0 0 4px;text-transform:uppercase;letter-spacing:.6px}
+input,select{width:100%;background:#000;color:#fff;border:1px solid #555;border-radius:10px;padding:12px;font-size:17px;outline:none}
+input:focus,select:focus{border-color:var(--red)}
+.row{display:flex;gap:8px;margin-top:10px}.row>div{flex:1}
+.seg{display:flex;gap:8px}.seg button{flex:1;padding:12px;font-size:16px;background:#000;color:var(--silver);border:1px solid #555;border-radius:10px}
+.seg button.on{background:var(--red);border-color:var(--red);color:#fff;font-weight:700}
+.res{border-color:var(--red)}
+.big{font-size:24px;font-weight:800;margin:2px 0}.red{color:var(--red)}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:15px}
+.kv span:first-child{color:var(--silver)}.kv span:last-child{text-align:right;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{color:var(--silver);text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;padding:4px 6px}
+td{padding:8px 6px;border-top:1px solid var(--line);vertical-align:top}
+tr.cur td{background:var(--red);color:#fff;font-weight:700}
+tr.cur td small{color:#fff}small{color:var(--dim);display:block;font-weight:400}
+.err{color:#ff6b6b;font-size:14px;margin-top:8px}
+.note{font-size:12px;color:var(--dim);line-height:1.45}.note b{color:var(--silver)}
+</style>
+</head>
+<body>
+<h1><b>СКТО</b> | Возрастные группы</h1>
+<p class="sub">Конькобежный спорт · классика (не шорт-трек)</p>
+<noscript><div class="card err">Нужен JavaScript. Откройте файл в Safari или Chrome.</div></noscript>
+
+<div class="card">
+  <label for="dob">Дата рождения</label>
+  <input id="dob" inputmode="numeric" autocomplete="off" placeholder="ДД.ММ.ГГГГ" maxlength="10">
+  <div class="row">
+    <div><label>Пол</label><div class="seg"><button id="m" class="on" type="button">Мужской</button><button id="f" type="button">Женский</button></div></div>
+  </div>
+  <div class="row">
+    <div><label for="ssn">Спортивный сезон</label><select id="ssn"></select></div>
+  </div>
+  <div id="err" class="err"></div>
+</div>
+
+<div id="out"></div>
+
+<div class="card note">
+<b>Как считается.</b> Спортивный сезон: 1 июля – 30 июня. Возраст определяется по сезону, а не по дню рождения: берётся число полных лет на 30 июня (конец сезона). Поэтому группа меняется 1 июля, в начале сезона, в котором спортсмен «достигает» нижней границы возраста группы. Родившиеся 1 июля и позже относятся к «сезону рождения» этого года, родившиеся по 30 июня включительно – к предыдущему.<br><br>
+<b>Допуск.</b> Это основная возрастная группа. Фактический допуск (в том числе в старшие группы) определяется положением конкретных соревнований и условиями Правил.<br><br>
+<b>Источник.</b> Правила вида спорта «конькобежный спорт», утв. приказом Минспорта России от 24.09.2019 № 768 (с изменениями), возрастные группы 9–11, 12–13, 14–15, 16–17, 18–19 лет и старше; п. 5.5 – возраст «в сезон проведения соревнований (с 1 июля по 30 июня)». Редакцию на дату использования сверяйте на сайте Минспорта России и Союза конькобежцев России.
+</div>
+
+<script>
+// ===== Правила расчёта =====
+var GROUPS=[
+ {k:"Детский возраст",min:9,max:11,m:"Мальчики",f:"Девочки"},
+ {k:"Младший возраст",min:12,max:13,m:"Юноши младшего возраста",f:"Девушки младшего возраста"},
+ {k:"Средний возраст",min:14,max:15,m:"Юноши среднего возраста",f:"Девушки среднего возраста"},
+ {k:"Старший возраст",min:16,max:17,m:"Юноши старшего возраста",f:"Девушки старшего возраста"},
+ {k:"Юниоры / юниорки",min:18,max:19,m:"Юниоры",f:"Юниорки"},
+ {k:"Мужчины / женщины",min:20,max:null,m:"Мужчины",f:"Женщины"}
+];
+var MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+// сезон рождения: год 1 июля, с которого отсчитывается "сезонный" возраст
+function birthSeason(d,mo,y){return mo>=7?y:y-1}
+function ageInSeason(bs,S){return S-bs}
+function groupIndex(age){
+ if(age<9)return -1;
+ for(var i=0;i<GROUPS.length;i++){var g=GROUPS[i];if(age>=g.min&&(g.max===null||age<=g.max))return i}
+ return -1;
+}
+function seasonLabel(S){return S+"/"+(S+1)}
+function seasonStart(S){return "1 июля "+S+" года"}
+function currentSeason(now){return now.getMonth()>=6?now.getFullYear():now.getFullYear()-1}
+function parseDob(s){
+ var m=/^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s);if(!m)return null;
+ var d=+m[1],mo=+m[2],y=+m[3],t=new Date(y,mo-1,d);
+ if(t.getFullYear()!==y||t.getMonth()!==mo-1||t.getDate()!==d)return null;
+ return {d:d,mo:mo,y:y};
+}
+function calc(dob,S){
+ var bs=birthSeason(dob.d,dob.mo,dob.y),age=ageInSeason(bs,S),gi=groupIndex(age);
+ var next=null;
+ if(gi===-1&&age<9)next=0;else if(gi>=0&&gi<GROUPS.length-1)next=gi+1;
+ return {bs:bs,age:age,gi:gi,next:next,
+  nextSeason:next===null?null:bs+GROUPS[next].min,
+  starts:GROUPS.map(function(g){return bs+g.min})};
+}
+// ===== Интерфейс =====
+var sex="m",$=function(i){return document.getElementById(i)};
+// ===== Настройки модуля (отдельный ключ; добавлено при переносе в PWA) =====
+var SKEY="skto-tools.age-groups.settings.v1";
+function loadSet(){try{var o=JSON.parse(localStorage.getItem(SKEY)||"{}");if(o&&(o.sex==="m"||o.sex==="f"))sex=o.sex}catch(e){}}
+function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify({sex:sex}))}catch(e){}}
+loadSet();
+function init(){
+ var cur=currentSeason(new Date()),sel=$("ssn"),h="";
+ for(var s=2010;s<=2050;s++)h+='<option value="'+s+'"'+(s===cur?" selected":"")+'>'+seasonLabel(s)+(s===cur?" (текущий)":"")+'</option>';
+ sel.innerHTML=h;
+ $("m").className=sex==="m"?"on":"";$("f").className=sex==="f"?"on":"";
+ $("dob").addEventListener("input",function(e){
+  var v=this.value.replace(/\D/g,"").slice(0,8),o=v;
+  if(v.length>4)o=v.slice(0,2)+"."+v.slice(2,4)+"."+v.slice(4);else if(v.length>2)o=v.slice(0,2)+"."+v.slice(2);
+  this.value=o;render();
+ });
+ sel.addEventListener("change",render);
+ $("m").onclick=function(){sex="m";$("m").className="on";$("f").className="";saveSet();render()};
+ $("f").onclick=function(){sex="f";$("f").className="on";$("m").className="";saveSet();render()};
+ render();
+}
+function render(){
+ var out=$("out"),err=$("err"),v=$("dob").value;err.textContent="";out.innerHTML="";
+ if(v.length<10)return;
+ var dob=parseDob(v);
+ if(!dob||dob.y<1950){err.textContent="Проверьте дату: формат ДД.ММ.ГГГГ";return}
+ if(new Date(dob.y,dob.mo-1,dob.d)>new Date()){err.textContent="Дата рождения в будущем";return}
+ var S=+$("ssn").value,r=calc(dob,S);
+ var gname,gtitle,h="";
+ if(r.age<0){err.textContent="В выбранном сезоне спортсмен ещё не родился";return}
+ if(r.gi===-1){gtitle="Вне возрастных групп";gname="Младше 9 лет (возраст в сезоне: "+r.age+")"}
+ else{gtitle=GROUPS[r.gi].k;gname=GROUPS[r.gi][sex]}
+ h+='<div class="card res"><label>Сезон '+seasonLabel(S)+'</label><div class="big red">'+gtitle+'</div>'
+  +'<div style="font-size:16px;font-weight:600">'+gname+'</div>'
+  +'<div class="kv" style="margin-top:8px"><span>Возраст в сезоне</span><span>'+r.age+' '+(r.age>=0?plural(r.age):"")+'</span></div>'
+  +'<div class="kv"><span>Сезон</span><span>'+seasonStart(S)+' – 30 июня '+(S+1)+'</span></div>';
+ if(r.next!==null){
+  h+='<div class="kv"><span>Следующая группа</span><span>'+GROUPS[r.next].k+'<br><small style="display:inline">'+GROUPS[r.next][sex]+'</small></span></div>'
+   +'<div class="kv"><span>Переход</span><span class="red">'+seasonStart(r.nextSeason)+'<br><small style="display:inline">сезон '+seasonLabel(r.nextSeason)+'</small></span></div>';
+ }else h+='<div class="kv"><span>Следующая группа</span><span>Нет, высшая группа</span></div>';
+ h+='</div><div class="card"><label>Все возрастные группы</label><table><tr><th>Группа</th><th>Возраст</th><th>С сезона</th></tr>';
+ for(var i=0;i<GROUPS.length;i++){
+  var g=GROUPS[i],rng=g.max===null?g.min+" и старше":g.min+"–"+g.max;
+  h+='<tr'+(i===r.gi?' class="cur"':'')+'><td>'+g.k+'<small>'+g[sex]+'</small></td><td>'+rng+'</td><td>'+seasonLabel(r.starts[i])+'<small>с 1 июля '+r.starts[i]+'</small></td></tr>';
+ }
+ h+='</table></div>';
+ out.innerHTML=h;
+}
+function plural(n){var a=n%100,b=n%10;return(a>10&&a<15)?"лет":b===1?"год":(b>1&&b<5)?"года":"лет"}
+init();
+</script>
+</body>
+</html>
