@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>СКТО | Разрядный калькулятор</title>
+<style>
+:root{--red:#e01b24;--red2:#7d0f14;--sil:#c4c9cf;--mut:#8b9097;--line:#2b2e33;--card:#121315;--card2:#1b1c1f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#000;color:#fff}
+body{font:16px/1.4 -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+header{padding:18px 16px 12px;border-bottom:3px solid var(--red);background:linear-gradient(#0c0c0d,#000)}
+h1{margin:0;font-size:22px;letter-spacing:.2px}
+h1 b{color:var(--red)}
+.sub{color:var(--sil);font-size:14px;margin-top:2px}
+.wrap{max-width:720px;margin:0 auto;padding:12px 12px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+label{display:block;font-size:13px;color:var(--sil);margin:10px 0 4px}
+label:first-child{margin-top:0}
+select,input{width:100%;font:inherit;font-size:17px;color:#fff;background:#000;border:1.5px solid #4a4e55;border-radius:10px;padding:13px 12px;min-height:50px}
+select:focus,input:focus,button:focus-visible{outline:2px solid var(--red);outline-offset:1px}
+.seg{display:flex;gap:8px}
+.seg button,.tabs button,.chips button{font:inherit;color:var(--sil);background:var(--card2);border:1.5px solid #3a3d43;border-radius:10px;min-height:50px;padding:8px 10px;cursor:pointer}
+.seg button{flex:1;font-size:18px;font-weight:600}
+.seg button.on,.tabs button.on,.chips button.on{background:var(--red);border-color:var(--red);color:#fff}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.tabs button{font-size:15px;font-weight:600}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.chips button{font-size:16px;font-weight:600}
+.chips button:disabled{opacity:.3}
+.big{text-align:center;padding:18px 8px}
+.big .n{font-size:44px;font-weight:700;letter-spacing:.5px;color:#fff;font-variant-numeric:tabular-nums}
+.big .l{color:var(--sil);font-size:15px}
+.big .u{color:var(--mut);font-size:13px;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-weight:500;color:var(--mut);font-size:12px;text-align:left;padding:4px 6px}
+td{padding:11px 6px;border-top:1px solid var(--line);font-size:16px}
+td:nth-child(2){font-weight:600;white-space:nowrap}
+td:nth-child(3){font-size:13px;color:var(--mut)}
+tr.ok td{color:var(--sil)}
+tr.ok td:nth-child(3){color:#8fd19a}
+tr.best td{background:rgba(224,27,36,.16);color:#fff}
+tr.best td:first-child{border-left:4px solid var(--red)}
+tr.no td{color:#555}
+.res{border:1.5px solid var(--red);background:#150607}
+.res .h{font-size:13px;color:var(--sil)}
+.res .v{font-size:30px;font-weight:700;margin:2px 0}
+.warn{color:#ffb4b7;font-size:14px;margin-top:8px}
+.note{color:var(--sil);font-size:13.5px;margin-top:8px}
+.dis{border-left:3px solid var(--sil);padding-left:10px;margin-top:10px;font-size:14px;color:#fff}
+details{margin-top:8px}
+summary{cursor:pointer;color:var(--sil);font-size:14px;padding:6px 0}
+ul{margin:6px 0;padding-left:18px;font-size:14px;color:var(--sil)}
+li{margin:4px 0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+[hidden]{display:none!important}
+.topbar{position:sticky;top:0;z-index:20;background:#000;border-bottom:1px solid var(--line);padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px}
+.topbar button{font:inherit;font-weight:600;font-size:16px;color:#fff;background:var(--card2);border:1.5px solid var(--sil);border-radius:10px;min-height:46px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+.topbar .acc{margin-left:auto;font-size:14px;color:var(--sil);text-align:right;font-variant-numeric:tabular-nums}
+.mtitle{font-size:22px;font-weight:700;margin:6px 2px 14px}
+.mbtn{display:block;width:100%;text-align:left;font:inherit;color:#fff;background:var(--card);border:2px solid var(--red);border-radius:14px;padding:20px 16px;margin-bottom:14px;min-height:104px;cursor:pointer}
+.mbtn b{display:block;font-size:22px;margin-bottom:6px}
+.mbtn span{color:var(--sil);font-size:14.5px}
+.mbtn:active{background:var(--red2)}
+.lr{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.lr .t{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.lr .t b{font-size:15px}
+.lr .t .cum{font-size:19px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;border-left:3px solid var(--red);padding-left:8px;min-width:96px;text-align:right}
+.lr .t .cum.e{color:#555;font-weight:400}
+.tf{display:flex;align-items:center;gap:4px}
+.tf i{font-style:normal;color:var(--sil);font-size:22px;font-weight:700}
+.tf input{width:56px;text-align:center;padding:8px 2px;font-size:22px;min-height:50px;font-variant-numeric:tabular-nums}
+.tf input.d{width:44px}
+.tf input.bad{border-color:var(--red)}
+.tf .u{font-size:12px;color:var(--mut);margin-left:6px}
+.clr{font:inherit;font-weight:600;color:#fff;background:var(--card2);border:1.5px solid var(--red);border-radius:10px;min-height:50px;width:100%;margin-top:12px;cursor:pointer}
+.tot{font-size:46px;font-weight:700;font-variant-numeric:tabular-nums;margin:2px 0}
+footer{font-size:12px;color:var(--mut);padding:4px 4px 0}
+footer b{color:var(--sil)}
+.fl{color:#ffb4b7}
+</style>
+</head>
+<body>
+<header>
+  <h1><b>СКТО</b> | Разрядный калькулятор</h1>
+  <div class="sub">Нормативы по конькобежному спорту</div>
+</header>
+<div class="topbar" id="topbar" hidden><button type="button" onclick="goMenu()">← Меню разрядов</button><span class="acc" id="acc"></span></div>
+<div class="wrap" id="menu">
+  <div class="mtitle">СКТО — Калькулятор разрядов</div>
+  <button type="button" class="mbtn" onclick="show('calc')"><b>Калькулятор разрядов</b><span>Введите итоговое время дистанции и узнайте, какой разряд выполнен</span></button>
+  <button type="button" class="mbtn" onclick="show('laps')"><b>Расчёт по кругам</b><span>Введите разгон и каждый круг — итоговое время и разряд посчитаются сами</span></button>
+</div>
+<div class="wrap" id="wrapCalc" hidden>
+  <div class="card">
+    <label>Пол</label>
+    <div class="seg" id="seg"></div>
+    <label for="cat">Категория катка</label>
+    <select id="cat"></select>
+    <label for="dis">Дистанция / дисциплина</label>
+    <select id="dis"></select>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div id="view"></div>
+  <footer id="foot"></footer>
+</div>
+<div class="wrap" id="wrapLaps" hidden>
+  <div class="card">
+    <label>Пол</label><div class="seg" id="lseg"></div>
+    <label for="lcat">Категория катка (тип и высота — как в калькуляторе разрядов)</label>
+    <select id="lcat"></select>
+    <label>Дистанция</label><div class="chips" id="ldist"></div>
+    <div class="note">Указывайте точное время каждого отрезка до сотых секунды.</div>
+    <button type="button" class="clr" onclick="lapsClear()">Очистить расчёт</button>
+  </div>
+  <div id="lrows"></div>
+  <div id="lres"></div>
+</div>
+<script>
+"use strict";
+/* ===== Источник =====
+ Приказ Минспорта России от 14.12.2022 № 1216 «Об утверждении ЕВСК (виды спорта, включённые в программу Олимпийских зимних игр)»,
+ Приложение № 5 «Нормы, требования и условия их выполнения по виду спорта „конькобежный спорт“», раздел 4.
+ Копия текста: sudact.ru (отмечена как действующая, ред. от 10.03.2026). Таблицы сняты 18.11.2026.
+ Сверка с официальной публикацией (publication.pravo.gov.ru) НЕ выполнена. */
+
+const LV=["МСМК","МС","КМС","I","II","III","I юн.","II юн.","III юн."];
+const LVF=["Мастер спорта России международного класса","Мастер спорта России","Кандидат в мастера спорта","I спортивный разряд","II спортивный разряд","III спортивный разряд","I юношеский разряд","II юношеский разряд","III юношеский разряд"];
+const AGE=[17,15,13,11,11,11,9,9,9];
+const FAC={500:1,777:1.55,1000:2,1500:3,3000:6,5000:10,10000:20};
+const CATS={
+ A:"Открытые катки до 600 м над уровнем моря",
+ B:"Крытые катки до 600 м и открытые катки свыше 600 м",
+ C:"Крытые катки свыше 600 м",
+ D:"Шорт-трек: ледовые арены до 600 м",
+ E:"Шорт-трек: ледовые арены свыше 600 м"};
+/* id:[название, тип t=время/p=очки, состав многоборья для очков] */
+const N={
+ d100:["100 м","t"],d300:["300 м","t"],d500:["500 м","t"],d1000:["1000 м","t"],d1500:["1500 м","t"],d3000:["3000 м","t"],d5000:["5000 м","t"],d10000:["10 000 м","t"],
+ s500:["Шорт-трек 500 м","t"],s777:["Шорт-трек 777 м","t"],s1000:["Шорт-трек 1000 м","t"],s1500:["Шорт-трек 1500 м","t"],
+ m1:["Многоборье 500+1000+500+1000","p",[500,1000,500,1000]],
+ m2:["Многоборье 500+1500+1000+5000","p",[500,1500,1000,5000]],
+ m3:["Многоборье 500+3000+1500+5000","p",[500,3000,1500,5000]],
+ m4:["Многоборье 500+5000+1500+10 000","p",[500,5000,1500,10000]],
+ m5:["Многоборье 500+1500+1000+3000","p",[500,1500,1000,3000]],
+ m6:["Многоборье 100+300+100+300","p",null],
+ st3:["Шорт-трек троеборье (1000+500+777)","p",[1000,500,777]],
+ sm1:["Шорт-трек многоборье (1500+500+1000+1500)","p",[1500,500,1000]],
+ sm2:["Шорт-трек многоборье (1500+500+1000+3000)","p",[1500,500,1000]],
+ t8:["Командный забег 8 кругов","t"],t6:["Командный забег 6 кругов","t"],ts:["Командный забег — спринт 3 круга","t"],
+ r4:["Эстафета 4×400 м","t"],rm:["Эстафета смешанная 4×400 м","t"],
+ sr3:["Шорт-трек эстафета 3 чел., 2000 м","t"],sr4a:["Шорт-трек эстафета 4 чел., 3000 м","t"],sr4b:["Шорт-трек эстафета 4 чел., 5000 м","t"]};
+const GROUPS=[
+ ["Дистанции",["d100","d300","d500","d1000","d1500","d3000","d5000","d10000","s500","s777","s1000","s1500"]],
+ ["Многоборья",["m1","m2","m3","m4","m5","m6","st3","sm1","sm2"]],
+ ["Командные забеги и эстафеты",["t8","t6","ts","r4","rm","sr3","sr4a","sr4b"]]];
+const TEAM=["t8","t6","ts","r4","rm","sr3","sr4a","sr4b"];
+/* 18 ячеек: МСМК м, ж, МС м, ж, КМС м, ж, I м, ж, II м, ж, III м, ж, I юн м, ж, II юн м, ж, III юн м, ж. «-» нет нормы. «?» значение неподтверждено */
+const RAW={
+A:{
+d100:"- - - - - - 11.80 12.50 12.10 13.20 13.00 13.80 13.90 14.60 15.10 15.80 16.50 17.30",
+d300:"- - - - - - 29.00 31.20 29.80 33.40 32.90 35.10 35.50 37.60 39.00 41.20 43.30 45.50",
+d500:"36.00 39.20 39.00 42.00 42.50 45.90 45.40 49.00 48.40 52.60 51.50 55.50 56.20 59.80 59.40 1:04.30 1:02.20 1:07.50",
+d1000:"1:11.20 1:18.00 1:16.20 1:23.00 1:22.90 1:30.40 1:31.00 1:38.60 1:35.80 1:44.40 1:43.60 1:49.60 1:50.60 2:00.60 1:56.10 2:06.60 2:01.90 2:12.90",
+d1500:"1:49.90 2:00.50 1:56.10 2:07.30 2:06.40 2:18.60 2:19.10 2:32.50 2:26.00 2:40.10 2:33.30 2:48.10 2:48.70 3:04.90 2:57.10 3:14.20 3:05.90 3:23.90",
+d3000:"3:57.00 4:14.50 4:14.60 4:29.00 4:34.20 4:52.80 4:56.80 5:22.10 5:16.70 5:38.20 5:32.50 5:55.10 6:05.80 6:30.60 6:24.10 - 6:43.30 -",
+d5000:"6:32.00 7:17.70 6:59.00 7:42.40 7:36.20 8:23.50 8:21.90 9:13.90 8:47.00 9:41.50 9:13.30 10:10.60",
+d10000:"13:36.60 - 14:30.00 - 15:47.30 - 17:22.00 - 18:14.10 - 19:08.80",
+m1:"144.20 158.10 156.00 170.60 171.10 185.80 188.20 198.80 195.90 213.70 207.50 225.30 228.20 243.00 239.60 260.20 251.60 273.20",
+m2:"153.70 - 162.30 - 176.80 - 189.70 - 202.90 - 214.40",
+m3:"- 170.50 - 180.90 181.20 197.00 195.10 211.40 208.10 227.50 214.60 238.90",
+m4:"158.10 - 167.90 - 182.90 - 198.60 - 211.90 - 221.80",
+m5:"- 166.40 - 176.00 176.80 191.70 189.50 205.10 202.00 220.90 214.50 232.40 235.80 252.30",
+m6:"- - - - - - 79.30 84.90 84.90 89.00 90.60 94.20 100.90 103.00 108.10 114.30 113.30 125.60",
+t8:"3:50.70 - 4:08.60 - 4:30.61 - 4:57.70 - 5:12.60 - 5:28.20",
+t6:"- 3:07.40 - 3:17.90 - 3:35.50 - 3:57.00 - 4:08.90 - 4:21.30",
+ts:"1:22.40 1:30.00 1:29.30 1:37.40 1:37.60 1:46.20 1:47.30 1:56.70 1:52.70 2:02.50 1:58.30 2:08.60",
+r4:"- - - - 2:19.80 2:28.80 2:29.10 2:40.60 2:38.10 2:52.10 2:49.80 3:01.20 3:03.60 3:15.80 3:22.00 3:33.50 3:45.00 3:56.50",
+rm:"- - - - 2:25.60 2:25.60 2:32.90 2:32.90 2:45.20 2:45.20 2:55.10 2:55.10 3:09.80 3:09.80 3:27.70 3:27.70 3:50.80 3:50.80"},
+B:{
+d100:"- - - - - - 11.50 12.20 11.80 12.90 12.70 13.40 13.50 14.20 14.70 15.40 16.10 16.80",
+d300:"- - - - - - 28.20 30.30 29.00 32.50 32.00 34.10 34.50 36.60 37.90 40.00 42.10 44.20",
+d500:"34.60 37.75 36.50 39.50 41.20 44.60 44.10 47.60 47.00 51.10 50.00 53.90 54.60 58.10 57.70 1:02.40 1:03.60 1:05.60?",
+d1000:"1:08.50 1:14.61 1:10.90 1:19.50 1:20.50 1:27.80 1:28.40 1:35.80 1:33.00 1:41.40 1:37.60 1:46.40 1:47.40 1:57.10 1:52.80 2:02.90 1:58.40 2:09.10",
+d1500:"1:45.60 1:54.63 1:50.50 2:03.70 2:02.80 2:14.60 2:15.00 2:28.50 2:21.80 2:35.40 2:28.90 2:43.20 2:43.70 2:59.50 2:51.90 3:08.50 3:00.50 3:17.90",
+d3000:"3:50.00 4:01.52 4:02.50 4:21.50 4:26.20 4:46.30 4:48.20 5:12.70 5:07.50 5:28.30 5:22.80 5:44.70 5:55.10 6:19.20 6:12.90 - 6:31.50 -",
+d5000:"6:15.85 6:58.77 6:41.40 7:28.90 7:23.00 8:10.80 8:07.20 8:57.70 8:31.60 9:24.60 8:57.20 9:52.80",
+d10000:"13:05.10 - 14:13.28 - 15:19.70 - 16:51.70 - 17:42.30 - 18:35.40",
+m1:"139.40 152.50 148.60 163.10 166.10 180.40 178.70 193.10 190.20 207.50 201.40 218.70 221.60 236.20 232.60 252.60 244.30 265.30",
+m2:"149.20 - 157.60 - 171.20 - 184.20 - 197.00 - 208.10",
+m3:"- 163.00 - 175.60 175.90 191.20 189.50 205.30 202.10 220.90 213.30 231.90",
+m4:"151.60 - 162.00 - 177.60 - 192.90 - 205.10 - 215.30",
+m5:"- 161.50 - 170.70 171.70 186.10 184.00 199.20 196.20 214.50 208.20 225.70 229.10 245.00",
+m6:"- - - - - - 77.00 82.50 82.50 86.50 88.00 91.50 98.00 100.00 105.00 111.00 110.00 122.00",
+t8:"3:44.00 - 4:01.30 - 4:22.80 - 4:49.00 - 5:03.50 - 5:18.70",
+t6:"- 3:01.90 - 3:12.20 - 3:29.20 - 3:50.10 - 4:01.60 - 4:13.70",
+ts:"1:20.00 1:27.50 1:27.00 1:34.40 1:34.70 1:43.00 1:44.20 1:53.30 1:49.40 1:58.90 1:54.90 2:04.90",
+r4:"- - - - 2:15.80 2:27.00 2:24.80 2:36.00 2:33.70 2:47.10 2:44.90 2:56.00 2:58.30 3:09.40 3:16.20 3:27.30 3:38.50 3:49.70",
+rm:"- - - - 2:21.40 2:21.40 2:30.40 2:30.40 2:40.40 2:40.40 2:50.40 2:50.40 3:04.30 3:04.30 3:21.70 3:21.70 3:44.10 3:44.10"},
+C:{
+d500:"34.40 37.50 36.00 40.00",d1000:"1:08.20 1:14.50 1:10.70 1:18.50",d1500:"1:44.50 1:55.50 1:50.00 2:01.50",
+d3000:"3:45.00 4:03.50 3:55.00 4:16.00",d5000:"6:12.00 6:59.00 6:37.80 7:23.00",d10000:"13:00.00 - 14:04.60",
+m1:"137.60 151.00 144.30 158.40",m2:"147.10 - 155.50",m3:"- 161.30 - 173.20",m4:"150.70 - 157.40",m5:"- 156.00 - 168.60",
+t8:"3:41.00 - 3:58.10",t6:"- 2:59.30 - 3:09.60",ts:"1:18.50 1:26.50 1:25.80 1:34.00"},
+D:{
+s500:"41.0 43.5 42.3 45.5 44.4 47.8 48.9 52.6 51.3 55.2 53.9 57.9 59.3 1:03.7 1:02.2 1:06.9 1:05.3 1:10.3",
+s777:"- - - - 1:11.1 1:16.4 1:18.2 1:24.1 1:22.1 1:28.3 1:26.2 1:32.7 1:34.8 1:42.0 1:39.5 1:47.1 1:44.5 1:52.4",
+s1000:"1:25.1 1:31.6 1:28.4 1:34.7 1:32.8 1:39.4 1:42.1 1:49.4 1:47.2 1:54.8 1:52.6 2:00.6 2:03.8 2:12.6 2:10.0 2:19.3 2:16.5 2:26.2",
+s1500:"2:15.3 2:23.8 2:21.8 2:28.8 2:28.9 2:36.2 2:43.8 2:51.9 2:52.0 3:00.5 3:00.6 3:09.5 3:18.6 3:28.4 3:28.6 3:38.8 3:39.0 3:49.8",
+st3:"- - - - 145.7 156.5 155.3 166.8 163.1 175.2 176.7 189.8 188.3 202.3 197.8 212.4 207.7 223.1",
+sm1:"- - 138.1 147.1 149.5 159.3 159.5 169.9 167.5 178.4 181.4 193.2 193.4 206.0",
+sm2:"131.6 140.8 138.1 147.1 149.5 159.3 159.5 169.9",
+sr3:"- - - - 2:59.0 3:07.0 3:07.9 3:16.3 3:17.3 3:26.2 3:27.2 3:36.5 3:37.6 3:47.3 3:48.5 3:58.7 3:59.9 4:10.6",
+sr4a:"4:07.7 4:15.8 4:16.6 4:26.0 4:29.4 4:39.3 4:42.9 4:53.3 4:57.0 5:07.9 5:11.9 5:23.3",
+sr4b:"6:53.8 - 7:12.1 - 7:33.7 - 7:56.4"},
+E:{
+s500:"40.6 43.4 42.7 45.9",s1000:"1:24.5 1:30.4 1:28.9 1:35.0",s1500:"2:14.0 2:21.5 2:20.0 2:28.0",
+st3:"- - - - 141.5 145.5 150.5 153.5 161.5 153.5? 170.5 173.5",
+sm1:"- - 136.5 146.0 143.5 154.5 153.0 164.5 163.5 174.5",
+sm2:"129.5 139.0 136.5 146.0 143.5 154.5 153.0 164.5",
+sr4a:"4:07.0 4:15.0 4:16.0 4:23.0",sr4b:"6:44.0 - 7:05.0 -"}
+};
+
+/* ===== Время и очки ===== */
+function pT(s){s=String(s).trim().replace(",",".");const m=s.match(/^(?:(\d{1,2}):)?(\d{1,3})(?:\.(\d{1,2}))?$/);if(!m)return NaN;const ss=+m[2];if(m[1]&&ss>=60)return NaN;const d=m[3]?+((m[3]+"0").slice(0,2)):0;return((m[1]?+m[1]:0)*60+ss)*100+d}
+function fT(v){const m=Math.floor(v/6000),r=v%6000,s=Math.floor(r/100),h=r%100;return(m?m+":"+String(s).padStart(2,"0"):String(s))+","+String(h).padStart(2,"0")}
+function fP(v){let s=(v/1000).toFixed(3);if(v%10===0)s=s.slice(0,-1);return s.replace(".",",")}
+function F(v,k){return k==="p"?fP(v):fT(v)}
+function fD(d,k){return k==="p"?fP(d)+" оч.":(d/100).toFixed(2).replace(".",",")+" с"}
+const DB={};
+for(const c in RAW){DB[c]={};for(const id in RAW[c]){const k=N[id][1],t=RAW[c][id].split(/\s+/);while(t.length<18)t.push("-");
+ DB[c][id]=t.map(x=>{if(x==="-")return null;let f=0;if(x.endsWith("?")){f=1;x=x.slice(0,-1)}return{v:k==="p"?Math.round(parseFloat(x)*1000):pT(x),f}})}}
+
+/* ===== Состояние ===== */
+const S={g:0,cat:"A",id:"d500",tab:0,lv:2,x:"",age:"",mid:"m1",pt:["","","",""]};
+/* Настройки модуля. Новый ключ: skto-tools.ranks.settings.v1.
+   Однократный перенос из старого ключа "skto" (старое значение НЕ удаляется). */
+const SKEY="skto-tools.ranks.settings.v1",OLD_SKEY="skto";
+function readSet(k){try{const t=localStorage.getItem(k);return t===null?null:JSON.parse(t)}catch(e){return null}}
+(function(){
+ try{
+  let o=readSet(SKEY);
+  if(o===null){
+   const old=readSet(OLD_SKEY);
+   if(old&&typeof old==="object"){o=old;try{localStorage.setItem(SKEY,JSON.stringify({g:old.g,cat:old.cat,id:old.id}))}catch(e){}}
+  }
+  if(o&&typeof o==="object")for(const k of["g","cat","id"])if(o[k]!==undefined)S[k]=o[k];
+ }catch(e){}
+ if(S.g!==0&&S.g!==1)S.g=0;
+ if(!DB[S.cat]||!DB[S.cat][S.id]){S.cat="A";S.id="d500"}
+})();
+function save(){try{localStorage.setItem(SKEY,JSON.stringify({g:S.g,cat:S.cat,id:S.id}))}catch(e){}}
+const $=id=>document.getElementById(id);
+const norm=(c,id,g,i)=>DB[c][id][i*2+g];
+const has=(c,id,g)=>LV.some((_,i)=>norm(c,id,g,i));
+
+function evalX(x,id,cat,g){
+ cat=cat||S.cat;g=g===undefined?S.g:g;
+ const k=N[id][1],r=LV.map((n,i)=>({i,c:norm(cat,id,g,i)}));
+ const ok=r.filter(o=>o.c&&!o.c.f);
+ let best=null;for(const o of r){if(o.c&&!o.c.f&&x<=o.c.v){best=o;break}}
+ let next=null;
+ if(best){for(let i=best.i-1;i>=0;i--){const o=r[i];if(o.c&&!o.c.f){next=o;break}}}
+ else if(ok.length)next=ok[ok.length-1];
+ return{r,best,next,k,ok}}
+
+function tableHTML(id,x){
+ const k=N[id][1];let h="<table><tr><th>Разряд</th><th>Норма (не более)</th><th>"+(x!=null?"Ваш результат":"")+"</th></tr>";
+ const e=x!=null?evalX(x,id):null;
+ for(let i=0;i<9;i++){const c=norm(S.cat,id,S.g,i);let cls="",a="",b="";
+  if(!c){cls="no";a="—";b="нет нормы"}
+  else if(c.f){a=F(c.v,k)+" ⚠";b="неподтверждён"}
+  else{a=F(c.v,k);if(e){if(x<=c.v){cls=(e.best&&e.best.i===i)?"best":"ok";b="запас "+fD(c.v-x,k)}else b="не хватает "+fD(x-c.v,k)}}
+  h+="<tr class='"+cls+"'><td>"+LV[i]+"</td><td>"+a+"</td><td>"+b+"</td></tr>"}
+ return h+"</table>"}
+
+function condHTML(i,id){
+ const L=[];
+ if(i===0)L.push("Соревнования не ниже других международных из ЕКП; на день выполнения нужно иметь звание МС или выполнить его норму. Либо чемпионат России (дважды) или чемпионат + Кубок России, если это предусмотрено Положением о ЕВСК (п. 1.1–1.2).");
+ if(i===1)L.push("Соревнования не ниже чемпионата федерального округа, двух и более ФО, чемпионатов Москвы… (в использованной копии текст пункта обрывается — уточнить по официальному тексту, п. 2).");
+ if(i<=1)L.push("Результат фиксируется электронным секундомером (до 0,01 с) или электронным автохронометражем (п. 3).");
+ if(i===2)L.push("Официальные соревнования не ниже уровня субъекта РФ (п. 4).");
+ if(i>=3&&i<=5)L.push("Официальные соревнования или физкультурные мероприятия не ниже первенства муниципального образования (п. 5).");
+ if(i>=6)L.push("Официальные соревнования и физкультурные мероприятия любого статуса (п. 6).");
+ L.push("Возраст: с "+AGE[i]+" лет; нужно достичь его в спортивный сезон (1 июля – 30 июня) проведения соревнований (п. 21).");
+ if(TEAM.includes(id))L.push("Командные забеги и эстафеты: норма засчитывается тем, кто бежал в забеге, где она выполнена; за забег присваивается только очередное звание или разряд (п. 7–8).");
+ if(id==="sm1"||id==="sm2")L.push("Суперфинал (последняя дистанция) в очках не учитывается (п. 11–12).");
+ return"<ul>"+L.map(s=>"<li>"+s+"</li>").join("")+"</ul>"}
+const DISC="<div class='dis'>Соответствие времени нормативу не означает автоматического присвоения разряда или звания: нужны условия выполнения и приказ о присвоении.</div>";
+
+/* ===== Интерфейс ===== */
+function head(){
+ $("seg").innerHTML=["Мужчины","Женщины"].map((t,i)=>"<button class='"+(S.g===i?"on":"")+"' onclick='setG("+i+")'>"+t+"</button>").join("");
+ $("cat").innerHTML=Object.keys(CATS).map(c=>"<option value='"+c+"'"+(c===S.cat?" selected":"")+">"+CATS[c]+"</option>").join("");
+ let o="";for(const[gn,ids]of GROUPS){const l=ids.filter(id=>DB[S.cat][id]);if(!l.length)continue;
+  o+="<optgroup label='"+gn+"'>"+l.map(id=>"<option value='"+id+"'"+(id===S.id?" selected":"")+">"+N[id][0]+(has(S.cat,id,S.g)?"":" — нет норм для пола")+"</option>").join("")+"</optgroup>"}
+ $("dis").innerHTML=o;
+ $("tabs").innerHTML=["Узнать норматив","Проверить результат","Очки многоборья","Условия и источник"].map((t,i)=>"<button class='"+(S.tab===i?"on":"")+"' onclick='setTab("+i+")'>"+t+"</button>").join("")}
+function setG(g){S.g=g;save();head();view()}
+function setTab(t){S.tab=t;head();view()}
+function setLv(i){S.lv=i;view()}
+$("cat").onchange=e=>{S.cat=e.target.value;if(!DB[S.cat][S.id])S.id=Object.keys(DB[S.cat])[0];save();head();view()};
+$("dis").onchange=e=>{S.id=e.target.value;save();view()};
+
+function noNorm(){return"<div class='card'>Для этой дисциплины и выбранного пола нормативы в ЕВСК не установлены. Смените пол или дистанцию.</div>"}
+
+function view(){
+ const v=$("view"),id=S.id,k=N[id][1];
+ if(S.tab===0){
+  if(!has(S.cat,id,S.g)){v.innerHTML=noNorm();return}
+  if(!norm(S.cat,id,S.g,S.lv)){const f=LV.findIndex((_,i)=>norm(S.cat,id,S.g,i));S.lv=f}
+  const c=norm(S.cat,id,S.g,S.lv);
+  v.innerHTML="<div class='card'><div class='chips'>"+LV.map((n,i)=>"<button "+(norm(S.cat,id,S.g,i)?"":"disabled ")+"class='"+(S.lv===i?"on":"")+"' onclick='setLv("+i+")'>"+n+"</button>").join("")+"</div></div>"+
+  "<div class='card big'><div class='l'>"+LVF[S.lv]+"</div><div class='n'>"+F(c.v,k)+(c.f?" ⚠":"")+"</div><div class='u'>"+(k==="p"?"очков, не более":"не более")+" · "+N[id][0]+" · "+(S.g?"женщины":"мужчины")+"</div>"+(c.f?"<div class='warn'>Значение неподтверждено — в источнике похоже на опечатку. Сверьте с официальным текстом.</div>":"")+"</div>"+
+  "<div class='card'>"+tableHTML(id,null)+"</div>"+
+  "<div class='card'><div class='h' style='font-weight:600'>Условия: "+LV[S.lv]+"</div>"+condHTML(S.lv,id)+DISC+"</div>";
+  return}
+ if(S.tab===1){
+  v.innerHTML="<div class='card'><label for='x'>Результат"+(k==="p"?" (очки, например 171.105)":" (40.52, 1:21.35, 2:15.60)")+"</label><input id='x' type='text' inputmode='text' autocomplete='off' placeholder='"+(k==="p"?"очки":"40.52")+"' value='"+S.x+"'>"+
+  "<label for='age'>Возраст в спортивный сезон, лет (необязательно)</label><input id='age' type='text' inputmode='numeric' autocomplete='off' value='"+S.age+"'></div><div id='res'></div>";
+  $("x").oninput=e=>{S.x=e.target.value;calc()};$("age").oninput=e=>{S.age=e.target.value;calc()};calc();return}
+ if(S.tab===2){mview();return}
+ info()}
+
+function calc(){
+ const id=S.id,k=N[id][1],r=$("res");if(!r)return;
+ if(!has(S.cat,id,S.g)){r.innerHTML=noNorm();return}
+ if(!S.x.trim()){r.innerHTML="<div class='card'>Введите результат — норматив определится сразу.</div>"+"<div class='card'>"+tableHTML(id,null)+"</div>";return}
+ let x;
+ if(k==="p"){x=Math.round(parseFloat(S.x.replace(",","."))*1000);if(!isFinite(x)||x<=0){r.innerHTML="<div class='card warn'>Введите число, например 171.105</div>";return}}
+ else{if(/[.,]\d{3,}/.test(S.x)){r.innerHTML="<div class='card warn'>Точность — до сотых секунды: не больше двух знаков после запятой.</div>";return}
+  x=pT(S.x);if(isNaN(x)||x<=0){r.innerHTML="<div class='card warn'>Не удалось разобрать время. Примеры: 40.52, 1:21.35, 2:15.60.</div>";return}}
+ const e=evalX(x,id),age=parseInt(S.age,10);let h="<div class='card res'>";
+ if(e.best){const i=e.best.i;h+="<div class='h'>Результат "+F(x,k)+" соответствует нормативу</div><div class='v'>"+LVF[i]+"</div><div class='h'>норма: не более "+F(e.best.c.v,k)+"</div>";
+  if(e.next)h+="<div class='note'>До «"+LV[e.next.i]+"» ("+F(e.next.c.v,k)+") не хватает <b>"+fD(x-e.next.c.v,k)+"</b></div>";
+  else h+="<div class='note'>Это наивысший норматив для дисциплины.</div>";
+  if(!isNaN(age)&&age<AGE[i])h+="<div class='warn'>Возраст "+age+" — меньше минимального для этого разряда ("+AGE[i]+" лет).</div>"}
+ else{h+="<div class='h'>Результат "+F(x,k)+"</div><div class='v'>Норматив не выполнен</div>";
+  if(e.next)h+="<div class='note'>До «"+LV[e.next.i]+"» ("+F(e.next.c.v,k)+") не хватает <b>"+fD(x-e.next.c.v,k)+"</b></div>"}
+ if(!isNaN(age)){const a=e.r.filter(o=>o.c&&!o.c.f&&x<=o.c.v&&age>=AGE[o.i]);if(e.best&&a.length&&a[0].i!==e.best.i)h+="<div class='warn'>По возрасту ("+age+") доступен разряд не выше «"+LV[a[0].i]+"».</div>"}
+ if(e.r.some(o=>o.c&&o.c.f))h+="<div class='warn'>⚠ Неподтверждённые значения в расчёте не участвуют.</div>";
+ h+=DISC+"</div><div class='card'>"+tableHTML(id,x)+"</div>";
+ if(e.best)h+="<div class='card'><div style='font-weight:600'>Условия: "+LV[e.best.i]+"</div>"+condHTML(e.best.i,id)+"</div>";
+ r.innerHTML=h}
+
+/* ===== Очки многоборья ===== */
+function mlist(){return Object.keys(DB[S.cat]).filter(i=>N[i][2])}
+function mview(){
+ const L=mlist();
+ if(!L.length){$("view").innerHTML="<div class='card'>Для этой категории катка многоборий в таблице нет.</div>";return}
+ if(!L.includes(S.mid))S.mid=L.includes(S.id)?S.id:L[0];
+ const comps=N[S.mid][2];
+ let h="<div class='card'><label for='mid'>Многоборье</label><select id='mid'>"+L.map(i=>"<option value='"+i+"'"+(i===S.mid?" selected":"")+">"+N[i][0]+"</option>").join("")+"</select>";
+ if(!comps)h+="<div class='warn'>Для 100 и 300 м формула очков в п. 9 приложения не указана — расчёт недоступен. Нормы смотрите во вкладках «Узнать норматив» и «Проверить результат».</div></div>";
+ else{h+="<div class='note'>Очки = время (с) ÷ коэффициент: 500 м — 1 с, 777 м — 1,55 с, 1000 м — 2 с, 1500 м — 3 с, 3000 м — 6 с, 5000 м — 10 с, 10 000 м — 20 с.</div>";
+  h+=comps.map((d,j)=>"<label for='p"+j+"'>Дистанция "+(j+1)+": "+d+" м</label><input id='p"+j+"' type='text' autocomplete='off' placeholder='40.52 или 1:21.35' value='"+(S.pt[j]||"")+"'>").join("")+"</div><div id='pres'></div>"}
+ $("view").innerHTML=h;
+ $("mid").onchange=e=>{S.mid=e.target.value;S.id=S.mid;S.pt=["","","",""];save();head();mview()};
+ if(comps){comps.forEach((d,j)=>{$("p"+j).oninput=e=>{S.pt[j]=e.target.value;pcalc()}});pcalc()}}
+function pcalc(){
+ const comps=N[S.mid][2],out=$("pres");let sum=0;
+ for(let j=0;j<comps.length;j++){const t=pT(S.pt[j]);if(!S.pt[j].trim()||isNaN(t)||t<=0){out.innerHTML="<div class='card'>Заполните времена на всех дистанциях.</div>";return}sum+=t*10/FAC[comps[j]]}
+ const x=Math.floor(sum+1e-6),id=S.mid,sv=S.id;S.id=id;
+ let h="<div class='card res'><div class='h'>Сумма очков</div><div class='v'>"+(x/1000).toFixed(3).replace(".",",")+"</div><div class='note'>Сумма усечена до трёх знаков; способ округления в тексте приложения не уточнён.</div>";
+ if(has(S.cat,id,S.g)){const e=evalX(x,id);
+  h+=e.best?"<div class='note'>Соответствует нормативу: <b>"+LVF[e.best.i]+"</b>"+(e.next?". До «"+LV[e.next.i]+"» не хватает "+fD(x-e.next.c.v,"p"):"")+"</div>":"<div class='note'>Норматив не выполнен"+(e.next?". До «"+LV[e.next.i]+"» не хватает "+fD(x-e.next.c.v,"p"):"")+"</div>";
+  h+=DISC+"</div><div class='card'>"+tableHTML(id,x)+"</div>"}
+ else h+="<div class='warn'>Для этого пола в этом многоборье нормативов нет — смените пол.</div></div>";
+ out.innerHTML=h}
+
+/* ===== Условия и источник ===== */
+function info(){
+ $("view").innerHTML="<div class='card'><b>Возраст</b><ul><li>МСМК — с 17 лет, МС — с 15, КМС — с 13</li><li>I–III разряды — с 11 лет</li><li>I–III юношеские — с 9 лет</li><li>Возраст нужно достичь в спортивный сезон с 1 июля по 30 июня.</li></ul>"+
+ "<b>Статус соревнований</b><ul><li>МСМК: международные не ниже включённых в ЕКП; чемпионат России (см. п. 1)</li><li>МС: не ниже чемпионата федерального округа (текст пункта в копии оборван)</li><li>КМС: не ниже официальных соревнований субъекта РФ</li><li>I–III: не ниже первенства муниципального образования</li><li>Юношеские: любой статус</li></ul>"+DISC+"</div>"+
+ "<div class='card'><b>Источник</b><ul><li>Приказ Минспорта России от 14.12.2022 № 1216 (ЕВСК, зарегистрирован в Минюсте 24.01.2023 № 72109), Приложение № 5, раздел 4.</li><li>Копия: sudact.ru, документ отмечен как действующий, ред. от 10.03.2026. Таблицы сняты 18.11.2026.</li><li>Положение о ЕВСК: приказ Минспорта России от 19.12.2022 № 1255 (с изменениями).</li><li class='fl'>Сверка с официальной публикацией не выполнена — перед подачей документов проверьте значения по официальному тексту.</li></ul>"+
+ "<div class='note'>Здесь только нормы ЕВСК. Это не контрольные нормативы физической подготовки спортивных школ.</div></div>"+
+ "<div class='card'><b>Что не включено или неподтверждено</b><ul>"+
+ "<li>Требования по местам и статусу соревнований (разделы 1–3 приложения: МСМК, МС, КМС, I–III, а также масс-старт) — числовых норм нет, в калькулятор не загружены.</li>"+
+ "<li>Шорт-трек, смешанные эстафеты 2 ж + 2 м (2000 и 3000 м): значения не удалось однозначно привязать к разрядам — не включены.</li>"+
+ "<li>100 и 300 м и многоборье 100+300+100+300: коэффициенты очков в п. 9 не указаны — очки не считаются.</li>"+
+ "<li>⚠ Крытые катки до 600 м, 500 м, III юн., женщины: в источнике «1,05,60» (похоже на 1:05,60) — не участвует в расчёте.</li>"+
+ "<li>⚠ Шорт-трек, арены свыше 600 м, троеборье, II разряд, женщины: 153,5 совпадает со значением I разряда — не участвует в расчёте.</li></ul></div>"+
+ "<div class='card'><b>Категории катков</b><ul>"+Object.keys(CATS).map(c=>"<li>"+CATS[c]+"</li>").join("")+"</ul><div class='note'>Для крытых катков свыше 600 м нормы есть только для МСМК и МС.</div></div>"}
+
+$("foot").innerHTML="<b>СКТО</b> — Союз конькобежцев Тульской области. Работает без интернета. Если страница не запускается в окне Telegram или другого встроенного просмотрщика, откройте файл в Safari или Chrome.";
+
+/* ===== Навигация ===== */
+const L={g:0,cat:"A",d:500,v:[]};
+const RUN={500:100,1000:200,1500:300,3000:200,5000:200},NL={500:1,1000:2,1500:3,3000:7,5000:12,10000:25},DL=[500,1000,1500,3000,5000,10000];
+function show(m){
+ $("menu").hidden=m!=="menu";$("wrapCalc").hidden=m!=="calc";$("wrapLaps").hidden=m!=="laps";$("topbar").hidden=m==="menu";
+ $("acc").textContent="";
+ if(m==="laps")lapsInit();
+ window.scrollTo(0,0)}
+function goMenu(){L.v=[];$("lrows").innerHTML="";$("lres").innerHTML="";show("menu")}
+
+/* ===== Расчёт по кругам ===== */
+function lapSegs(d){const a=[];if(RUN[d])a.push({n:"Разгон — "+RUN[d]+" м",u:"Время отрезка"});for(let i=1;i<=NL[d];i++)a.push({n:i+" круг — 400 м",u:"Время круга"});return a}
+function lapsInit(){
+ L.g=S.g;L.cat=["A","B","C"].includes(S.cat)?S.cat:"A";L.d=500;
+ $("lcat").innerHTML=["A","B","C"].map(c=>"<option value='"+c+"'"+(c===L.cat?" selected":"")+">"+CATS[c]+"</option>").join("");
+ lapsHead();lapsRows()}
+function lapsHead(){
+ $("lseg").innerHTML=["Мужчины","Женщины"].map((t,i)=>"<button type='button' class='"+(L.g===i?"on":"")+"' onclick='lapsG("+i+")'>"+t+"</button>").join("");
+ $("ldist").innerHTML=DL.map(d=>"<button type='button' class='"+(L.d===d?"on":"")+"' onclick='lapsD("+d+")'>"+(d===10000?"10 000":d)+" м</button>").join("")}
+function lapsG(g){L.g=g;lapsHead();lapsCalc()}
+$("lcat").onchange=e=>{L.cat=e.target.value;lapsCalc()};
+function lapsD(d){L.d=d;lapsHead();lapsRows()}
+function lapsClear(){lapsRows()}
+function lapsRows(){
+ const sg=lapSegs(L.d);L.v=sg.map(()=>["","","",""]);
+ $("lrows").innerHTML=sg.map((o,i)=>"<div class='lr'><div class='t'><b>"+o.n+"</b><span class='cum e' id='c"+i+"'>—</span></div>"+
+  "<div class='tf' data-i='"+i+"'><input data-f='0' inputmode='numeric' pattern='[0-9]*' maxlength='2' autocomplete='off' placeholder='мм' aria-label='минуты'><i>:</i><input data-f='1' inputmode='numeric' pattern='[0-9]*' maxlength='2' autocomplete='off' placeholder='сс' aria-label='секунды'><i>,</i><input class='d' data-f='2' inputmode='numeric' pattern='[0-9]*' maxlength='1' autocomplete='off' placeholder='д' aria-label='десятые'><input class='d' data-f='3' inputmode='numeric' pattern='[0-9]*' maxlength='1' autocomplete='off' placeholder='с' aria-label='сотые'><span class='u'>"+o.u+"</span></div></div>").join("");
+ $("lrows").oninput=lapsIn;
+ lapsCalc()}
+function lapsIn(e){
+ const el=e.target;if(el.tagName!=="INPUT")return;
+ const row=el.parentNode,i=+row.dataset.i,f=+el.dataset.f;
+ let v=el.value.replace(/\D/g,"").slice(0,f<2?2:1);
+ if(f===1&&v!==""&&+v>59)v=v.slice(0,-1);
+ el.value=v;L.v[i][f]=v;
+ const inp=row.querySelectorAll("input");
+ if((f===0||f===1)&&v.length===2)inp[f+1].focus();
+ else if(f===2&&v.length===1)inp[3].focus();
+ else if(f===3&&v.length===1&&i<L.v.length-1){const nx=$("lrows").querySelectorAll(".tf")[i+1];if(nx)nx.querySelectorAll("input")[1].focus()}
+ lapsCalc()}
+function segVal(a){if(a[1]===""||a[2]===""||a[3]==="")return null;return((a[0]===""?0:+a[0])*60+ +a[1])*100+ +a[2]*10+ +a[3]}
+function lapsCalc(){
+ const n=L.v.length;let k=0,cum=0,first=-1,any=0;
+ for(let i=0;i<n;i++){if(segVal(L.v[i])!==null)any++}
+ for(;k<n;k++){const t=segVal(L.v[k]);if(t===null)break;cum+=t;const c=$("c"+k);c.textContent=fT(cum);c.className="cum"}
+ for(let i=k;i<n;i++){const c=$("c"+i);c.textContent="—";c.className="cum e"}
+ $("acc").textContent=k?"Накоплено: "+fT(cum):"";
+ const r=$("lres"),id="d"+L.d,sg=lapSegs(L.d);
+ if(k<n){
+  let h="<div class='card'><div class='note' style='margin:0'>Итог появится, когда будут заполнены все отрезки ("+k+" из "+n+").";
+  if(any>k)h+=" Отрезок «"+sg[k].n+"» пропущен — последующие значения в накопленное время не входят.";
+  r.innerHTML=h+"</div></div>";return}
+ const e=evalX(cum,id,L.cat,L.g);let h="<div class='card res'><div class='h'>Итоговое время · "+(L.d===10000?"10 000":L.d)+" м</div><div class='tot'>"+fT(cum)+"</div>";
+ if(!has(L.cat,id,L.g))h+="<div class='warn'>Для выбранного пола и категории катка норматив по этой дистанции в ЕВСК не установлен — разряд не определяется.</div>";
+ else if(e.best){h+="<div class='h' style='margin-top:8px'>Выполненный разряд</div><div class='v'>"+LVF[e.best.i]+"</div><div class='h'>норма: не более "+fT(e.best.c.v)+"</div>";
+  h+=e.next?"<div class='note'>До «"+LV[e.next.i]+"» ("+fT(e.next.c.v)+") не хватает <b>"+fD(cum-e.next.c.v,"t")+"</b></div>":"<div class='note'>Это наивысший норматив для дистанции.</div>"}
+ else{h+="<div class='v' style='margin-top:8px'>Норматив не выполнен</div>";if(e.next)h+="<div class='note'>До «"+LV[e.next.i]+"» ("+fT(e.next.c.v)+") не хватает <b>"+fD(cum-e.next.c.v,"t")+"</b></div>"}
+ if(e.r.some(o=>o.c&&o.c.f))h+="<div class='warn'>⚠ Неподтверждённые значения в расчёте не участвуют.</div>";
+ r.innerHTML=h+DISC+"</div>"}
+
+head();view();
+</script>
+</body>
+</html>
